@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import 'chat_screen.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -14,33 +15,50 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('ShadowChat Login')),
+      appBar: AppBar(title: const Text('ShadowChat Login')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                bool signedIn = await _authService.signIn(
+                final signedIn = await _authService.signIn(
                   _emailController.text,
                   _passwordController.text,
                 );
+                if (!mounted) return; // Check mounted before using context
                 if (signedIn) {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (_) => ChatScreen()),
+                    MaterialPageRoute(builder: (_) => const ChatScreen()),
                   );
                 } else {
                   try {
@@ -48,18 +66,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       _emailController.text,
                       _passwordController.text,
                     );
+                    if (!mounted) return; // Check mounted before using context
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (_) => ChatScreen()),
+                      MaterialPageRoute(builder: (_) => const ChatScreen()),
                     );
                   } catch (e) {
+                    if (!mounted) return; // Check mounted before using context
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Error: $e')),
                     );
                   }
                 }
               },
-              child: Text('Sign In / Sign Up'),
+              child: const Text('Sign In / Sign Up'),
             ),
           ],
         ),

@@ -6,11 +6,13 @@ import '../models/message.dart';
 import 'login_screen.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreen> createState() => ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class ChatScreenState extends State<ChatScreen> {
   final ChatService _chatService = ChatService();
   final AuthService _authService = AuthService();
   final TextEditingController _messageController = TextEditingController();
@@ -25,10 +27,13 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _listenToMessages() {
-    _chatService.getMessages(_authService.getCurrentUser()!.uid).listen((snapshot) {
+    final user = _authService.getCurrentUser();
+    if (user == null) return;
+
+    _chatService.getMessages(user.uid).listen((snapshot) {
       setState(() {
         _messages = snapshot.docs
-            .map((doc) => Message.fromFirestore(doc.data() as Map<String, dynamic>))
+            .map((doc) => Message.fromFirestore(doc))
             .toList();
       });
       _startTimers();
@@ -37,16 +42,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _startTimers() {
     for (var message in List.from(_messages)) {
-      if (message.senderId == _authService.getCurrentUser()!.uid) {
-        Timer(Duration(seconds: 5), () {
+      if (message.senderId == _authService.getCurrentUser()?.uid) {
+        Timer(const Duration(seconds: 5), () {
           if (mounted) {
-            setState(() => _messages.remove(message));
+            setState(() => _messages.removeWhere((msg) => msg.id == message.id));
           }
         });
       } else {
-        Timer(Duration(minutes: 1), () {
+        Timer(const Duration(minutes: 1), () {
           if (mounted) {
-            setState(() => _messages.remove(message));
+            setState(() => _messages.removeWhere((msg) => msg.id == message.id));
           }
         });
       }
@@ -54,20 +59,27 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ShadowChat'),
+        title: const Text('ShadowChat'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await _authService.signOut();
+              if (!mounted) return;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => LoginScreen()),
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
               );
             },
-            icon: Icon(Icons.logout),
           ),
         ],
       ),
@@ -97,21 +109,27 @@ class _ChatScreenState extends State<ChatScreen> {
             if (_showHistory)
               Container(
                 color: Colors.grey[800],
-                padding: EdgeInsets.all(8.0),
-                child: Text('Chat History (Placeholder)', style: TextStyle(color: Colors.white)),
+                padding: const EdgeInsets.all(8.0),
+                child: const Text(
+                  'Chat History (Placeholder)',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _messageController,
-                      decoration: InputDecoration(hintText: 'Type a message'),
+                      decoration: const InputDecoration(
+                        hintText: 'Type a message',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.send),
+                    icon: const Icon(Icons.send),
                     onPressed: () {
                       if (_messageController.text.isNotEmpty) {
                         _chatService.sendMessage(
