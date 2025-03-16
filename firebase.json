@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "shadowchat-73d0b",
+          "appId": "1:505358154982:android:93dc507fb9e778f8fd8f27",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "shadowchat-73d0b",
+          "configurations": {
+            "android": "1:505358154982:android:93dc507fb9e778f8fd8f27",
+            "ios": "1:505358154982:ios:d1a8d568dc252a3dfd8f27",
+            "macos": "1:505358154982:ios:d1a8d568dc252a3dfd8f27",
+            "web": "1:505358154982:web:623e620879435dc5fd8f27",
+            "windows": "1:505358154982:web:3c0c884e4f69dc34fd8f27"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
