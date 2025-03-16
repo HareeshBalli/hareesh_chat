@@ -1,30 +1,30 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:firebase_core/firebase_core.dart'; // Keep for mocking
+import 'package:mockito/mockito.dart';
+import 'package:hareesh_chat/main.dart'; // Corrected package name
 
-import 'package:chat/main.dart';
+// Mock class for Firebase
+class MockFirebaseCore extends Mock implements FirebaseApp {}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setupAll(() {
+    // Mock Firebase initialization
+    TestWidgetsFlutterBinding.ensureInitialized();
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('ShadowChat displays AuthScreen', (WidgetTester tester) async {
+    // Mock FirebaseApp instance
+    final mockApp = MockFirebaseCore();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Wrap the app with a mock environment
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ShadowChatApp(),
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that AuthScreen is displayed (adjust based on your AuthScreen widget)
+    expect(find.text('Login'), findsOneWidget); // Adjust 'Login' to match your AuthScreen's AppBar title
   });
 }
